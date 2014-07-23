@@ -2,10 +2,11 @@ var fs = require('fs')
 
   , AsyncCache = require('async-cache')
 
-module.exports = function (pageSize, cacheSize) {
+module.exports = function (options) {
 
-  pageSize = pageSize || 16 * 1024
-  cacheSize = cacheSize || 100 * 1024 * 1024
+  options = options || {}
+
+  cacheSize = options.cacheSize || 100 * 1024 * 1024
 
   var cache = new AsyncCache({
           max: cacheSize
