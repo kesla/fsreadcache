@@ -39,9 +39,16 @@ module.exports = function (pageSize, cacheSize) {
       }
     , write = function (fd, buffer, offset, length, position, callback) {
         fs.write(fd, buffer, offset, length, position, function (err) {
+          var value
+
           if (err) return callback(err)
 
-          cache.del(fd)
+          if (position !== null || !(value = cache.peek(fd))) {
+            cache.del(fd)
+          } else {
+            cache.set(fd, Buffer.concat([ value, buffer.slice(offset, offset + length) ]))
+          }
+
           callback(null)
         })
       }

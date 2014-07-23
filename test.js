@@ -103,7 +103,43 @@ test('test with changed file', function (t) {
 
         fscache.read(fd, buffer, 0, input.length, 0, function (err) {
           t.equal(buffer.toString(), 'foo bar')
-          t.end()
+          fs.read(fd, buffer, 0, input.length, 0, function (err) {
+            t.equal(buffer.toString(), 'foo bar')
+            t.end()
+          })
+        })
+      })
+    })
+  })
+})
+
+test('test with appended file', function (t) {
+  var fd = getFdSync()
+    , fscache = fsreadcache()
+    , input = new Buffer('foo')
+    , input2 = new Buffer('bar')
+
+  fscache.write(fd, input, 0, input.length, null, function (err) {
+    t.error(err)
+
+    var buffer = new Buffer(input.length)
+    fscache.read(fd, buffer, 0, input.length, 0, function (err) {
+      t.error(err)
+      t.equal(buffer.toString(), 'foo')
+      fscache.write(fd, input2, 0, input2.length, null, function (err) {
+        t.error(err)
+
+        buffer = new Buffer(6)
+        fscache.read(fd, buffer, 0, buffer.length, 0, function (err) {
+          t.equal(buffer.toString(), 'foobar')
+          fscache.write(fd, input2, 1, 1, null, function (err) {
+
+            buffer = new Buffer(7)
+            fscache.read(fd, buffer, 0, buffer.length, 0, function (err) {
+              t.equal(buffer.toString(), 'foobara')
+              t.end()
+            })
+          })
         })
       })
     })
