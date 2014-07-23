@@ -1,41 +1,35 @@
 var fs = require('fs')
 
-  , lru = require('lru-cache')
+  , AsyncCache = require('async-cache')
 
 module.exports = function (pageSize, cacheSize) {
 
   pageSize = pageSize || 16 * 1024
   cacheSize = cacheSize || 100 * 1024 * 1024
 
-  var cache = lru({
+  var cache = new AsyncCache({
           max: cacheSize
         , length: function (n) { return n.length }
+        , load: function (fd, callback) {
+            fd = parseInt(fd, 10)
+
+            fs.fstat(fd, function (err, stat) {
+              if (err) return callback(err)
+
+              data = new Buffer(stat.size)
+
+              fs.read(fd, data, 0, data.length, 0, function (err) {
+                if (err)
+                  return callback(err)
+
+                callback(null, data)
+              })
+            })
+          }
       })
 
-    // for now, naively read the whole file
-    , getFromCache = function (fd, callback) {
-        var key = fd.toString()
-          , data = cache.get(key)
-
-        if (data)
-          return setImmediate(function () { callback(null, data) })
-
-        fs.fstat(fd, function (err, stat) {
-          if (err) return callback(err)
-
-          data = new Buffer(stat.size)
-
-          fs.read(fd, data, 0, data.length, 0, function (err) {
-            if (err)
-              return callback(err)
-
-            cache.set(key, data)
-            callback(null, data)
-          })
-        })
-      }
     , read = function (fd, buffer, offset, length, position, callback) {
-        getFromCache(fd, function (err, data) {
+        cache.get(fd, function (err, data) {
           if (err) return callback(err)
 
           data.copy(buffer, offset, position, position + length)
