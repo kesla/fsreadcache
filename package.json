@@ -1,6 +1,6 @@
 {
   "name": "fsreadcache",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Cache calls to fs.read",
   "main": "fsreadcache.js",
   "scripts": {
