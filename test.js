@@ -145,3 +145,24 @@ test('test with appended file', function (t) {
     })
   })
 })
+
+test('multiple cached reads', function (t) {
+  var fd = getFdSync()
+    , fscache = fsreadcache()
+    , input = new Buffer('beepboop')
+    , buffer = new Buffer(8)
+
+  fscache.write(fd, input, 0, input.length, null, function (err) {
+    t.error(err)
+
+    var get = function (index) {
+      if (index === 20000)
+        return t.end()
+
+      fscache.read(fd, buffer, 0, buffer.length, 0, get.bind(null, index + 1))
+    }
+
+    get(0)
+
+  })
+})

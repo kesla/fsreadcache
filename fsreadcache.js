@@ -35,9 +35,10 @@ module.exports = function (options) {
 
           data.copy(buffer, offset, position, position + length)
 
-          callback(null)
+          setImmediate(callback)
         })
       }
+
     , write = function (fd, buffer, offset, length, position, callback) {
         fs.write(fd, buffer, offset, length, position, function (err) {
           var value
