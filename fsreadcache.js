@@ -1,6 +1,7 @@
 var fs = require('fs')
 
   , AsyncCache = require('async-cache')
+  , setImmediate = global.setImmediate || process.nextTick
 
 module.exports = function (options) {
 
